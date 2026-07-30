@@ -195,7 +195,7 @@ export function ReportsPage() {
                     <div className="text-xs text-muted-foreground">Last: {company.lastScan}</div>
                   </div>
                   <Button variant="outline" size="sm" asChild>
-                    <Link href={`/dashboard/company/${company.id}`}>
+                    <Link href={`/dashboard/company?id=${company.id}`}>
                       <Eye className="w-4 h-4 mr-1" />
                       View
                     </Link>

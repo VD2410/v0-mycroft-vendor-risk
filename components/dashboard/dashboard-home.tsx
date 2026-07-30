@@ -673,7 +673,7 @@ export function DashboardHome() {
                 )}
                 {companyData?.companyId && (
                   <div className="mt-3 pt-3 border-t border-border">
-                    <Link href={`/dashboard/company/${companyData.companyId}`} className="text-xs text-primary hover:underline flex items-center gap-1">
+                    <Link href={`/dashboard/company?id=${companyData.companyId}`} className="text-xs text-primary hover:underline flex items-center gap-1">
                       View full vendor details <ExternalLink className="w-3 h-3" />
                     </Link>
                   </div>
@@ -878,7 +878,7 @@ export function DashboardHome() {
           {companyData?.companyId && (
             <div className="text-center">
               <Button variant="outline" asChild>
-                <Link href={`/dashboard/company/${companyData.companyId}`} className="gap-2">
+                <Link href={`/dashboard/company?id=${companyData.companyId}`} className="gap-2">
                   View Full Company Report <ExternalLink className="w-4 h-4" />
                 </Link>
               </Button>

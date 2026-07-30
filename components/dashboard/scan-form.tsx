@@ -21,7 +21,7 @@ export function ScanForm() {
     // Simulate scanning
     await new Promise((resolve) => setTimeout(resolve, 3000))
     setIsScanning(false)
-    router.push("/dashboard/company/mycroft")
+    router.push("/dashboard/company?id=1")
   }
 
   return (

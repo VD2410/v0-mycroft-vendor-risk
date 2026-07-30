@@ -130,7 +130,7 @@ export function VendorsPage() {
             {companies.map((company) => (
               <Link
                 key={company.id}
-                href={`/dashboard/company/${company.id}`}
+                href={`/dashboard/company?id=${company.id}`}
                 className="flex items-center justify-between p-4 rounded-lg bg-secondary/50 hover:bg-secondary transition-colors"
               >
                 <div className="flex items-center gap-3">

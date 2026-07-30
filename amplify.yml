@@ -5,6 +5,7 @@ frontend:
       commands:
         - npm install -g pnpm@10.28.0
         - pnpm install
+        - pnpm approve-builds --all || true
     build:
       commands:
         - pnpm run build
@@ -18,7 +19,7 @@ frontend:
       - node_modules/**/*
       - .next/cache/**/*
   customHeaders:
-    - pattern: "/api/**"
+    - pattern: "/**"
       headers:
         - key: "Cache-Control"
-          value: "no-cache, no-store, must-revalidate"
+          value: "public, max-age=3600"
