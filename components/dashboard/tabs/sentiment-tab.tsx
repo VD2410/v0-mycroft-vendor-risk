@@ -3,134 +3,158 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
-import { Eye, TrendingUp } from "lucide-react"
+import { Newspaper, ExternalLink, AlertTriangle, TrendingUp, TrendingDown, Minus } from "lucide-react"
 
-const sentimentSources = [
-  {
-    source: "Brightspark VC",
-    sentiment: "Positive",
-    type: "Investor",
-    quote: "Portfolio company - AI security leader",
-  },
-  { source: "BetaKit", sentiment: "Positive", type: "Media", quote: "Canadian cybersecurity startup to watch" },
-  { source: "SecurityWeek", sentiment: "Positive", type: "Media", quote: "Mentioned in security industry coverage" },
-  { source: "Luge Capital", sentiment: "Positive", type: "Investor", quote: "Fintech security innovation" },
-  { source: "G2 Reviews", sentiment: "Neutral", type: "Reviews", quote: "Limited reviews (early stage)" },
-]
+interface Article {
+  title?: string
+  source?: string
+  sentiment?: string
+  article_published_date?: string
+  url?: string
+  summary?: string
+}
 
-const investors = [
-  { name: "Luge Capital", type: "Lead", focus: "Fintech" },
-  { name: "Brightspark Ventures", type: "Participant", focus: "Tech" },
-  { name: "Graphite Ventures", type: "Participant", focus: "Enterprise" },
-]
+interface SentimentTabProps {
+  articles: Article[]
+  score?: number
+  reasoning?: string
+}
 
-export function SentimentTab() {
+export function SentimentTab({ articles, score, reasoning }: SentimentTabProps) {
+  const displayScore = score ?? 0
+
+  const getRiskColor = (s: number) => {
+    if (s >= 80) return "text-emerald-600"
+    if (s >= 60) return "text-cyan-600"
+    if (s >= 40) return "text-amber-600"
+    return "text-red-600"
+  }
+
+  const getSentimentBadge = (sentiment?: string) => {
+    const s = (sentiment || '').toLowerCase()
+    if (s === 'positive') return { className: "bg-emerald-100 text-emerald-700 border-emerald-200", icon: TrendingUp }
+    if (s === 'negative') return { className: "bg-red-100 text-red-700 border-red-200", icon: TrendingDown }
+    return { className: "bg-gray-100 text-gray-700 border-gray-200", icon: Minus }
+  }
+
+  const positiveCount = articles.filter(a => (a.sentiment || '').toLowerCase() === 'positive').length
+  const negativeCount = articles.filter(a => (a.sentiment || '').toLowerCase() === 'negative').length
+  const neutralCount = articles.filter(a => !['positive', 'negative'].includes((a.sentiment || '').toLowerCase())).length
+
   return (
     <div className="space-y-6">
       {/* Score Card */}
       <Card className="glass">
         <CardContent className="pt-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-chart-1/20 flex items-center justify-center">
-                <Eye className="w-6 h-6 text-chart-1" />
-              </div>
-              <div>
-                <div className="text-2xl font-bold text-chart-1">83/100</div>
-                <div className="text-sm text-muted-foreground">Reputation & Sentiment Score</div>
-              </div>
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h3 className="text-lg font-semibold text-foreground">Reputation & Sentiment Score</h3>
+              <p className="text-sm text-muted-foreground">Based on news analysis and public perception</p>
             </div>
-            <Badge className="bg-chart-1/20 text-chart-1 border-chart-1/30">Strongly Positive</Badge>
+            <div className={`text-4xl font-bold ${getRiskColor(displayScore)}`}>{displayScore}<span className="text-lg text-muted-foreground">/100</span></div>
           </div>
-          <Progress value={83} className="h-2 mt-4" />
+          <Progress value={displayScore} className="h-2" />
         </CardContent>
       </Card>
 
-      <div className="grid lg:grid-cols-2 gap-6">
-        {/* Sentiment Sources */}
+      {/* Sentiment Distribution */}
+      <div className="grid grid-cols-3 gap-4">
         <Card className="glass">
-          <CardHeader>
-            <CardTitle className="text-base">Sentiment Analysis Sources</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {sentimentSources.map((item) => (
-                <div key={item.source} className="flex items-center justify-between p-3 rounded-lg bg-secondary/50">
-                  <div>
-                    <div className="text-sm font-medium text-foreground">{item.source}</div>
-                    <div className="text-xs text-muted-foreground">{item.quote}</div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="text-xs">
-                      {item.type}
-                    </Badge>
-                    <Badge
-                      className={
-                        item.sentiment === "Positive"
-                          ? "bg-chart-1/20 text-chart-1 border-chart-1/30"
-                          : "bg-secondary text-secondary-foreground"
-                      }
-                    >
-                      {item.sentiment}
-                    </Badge>
-                  </div>
-                </div>
-              ))}
-            </div>
+          <CardContent className="pt-4 text-center">
+            <TrendingUp className="w-5 h-5 text-emerald-600 mx-auto mb-1" />
+            <div className="text-2xl font-bold text-emerald-600">{positiveCount}</div>
+            <div className="text-xs text-muted-foreground">Positive</div>
           </CardContent>
         </Card>
-
-        {/* Investors */}
         <Card className="glass">
-          <CardHeader>
-            <CardTitle className="text-base">Notable Investors</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {investors.map((inv) => (
-                <div key={inv.name} className="flex items-center justify-between p-3 rounded-lg bg-secondary/50">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-accent/20 flex items-center justify-center">
-                      <TrendingUp className="w-5 h-5 text-accent" />
-                    </div>
-                    <div>
-                      <div className="text-sm font-medium text-foreground">{inv.name}</div>
-                      <div className="text-xs text-muted-foreground">{inv.focus}</div>
-                    </div>
-                  </div>
-                  <Badge variant="outline">{inv.type}</Badge>
-                </div>
-              ))}
-            </div>
-            <div className="mt-4 p-3 rounded-lg bg-chart-1/10 border border-chart-1/20">
-              <div className="text-sm text-muted-foreground">
-                Total funding: <strong className="text-foreground">~$3.5M USD</strong> (Seed + Extension)
-              </div>
-            </div>
+          <CardContent className="pt-4 text-center">
+            <Minus className="w-5 h-5 text-gray-500 mx-auto mb-1" />
+            <div className="text-2xl font-bold text-gray-600">{neutralCount}</div>
+            <div className="text-xs text-muted-foreground">Neutral</div>
+          </CardContent>
+        </Card>
+        <Card className="glass">
+          <CardContent className="pt-4 text-center">
+            <TrendingDown className="w-5 h-5 text-red-600 mx-auto mb-1" />
+            <div className="text-2xl font-bold text-red-600">{negativeCount}</div>
+            <div className="text-xs text-muted-foreground">Negative</div>
           </CardContent>
         </Card>
       </div>
 
+      {/* Articles List */}
+      {articles.length === 0 ? (
+        <Card className="glass">
+          <CardContent className="pt-6 text-center">
+            <Newspaper className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+            <h3 className="text-lg font-semibold text-foreground mb-1">No Articles Found</h3>
+            <p className="text-sm text-muted-foreground">No news articles or media mentions were found for this company.</p>
+          </CardContent>
+        </Card>
+      ) : (
+        <Card className="glass">
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <Newspaper className="w-4 h-4" />
+              News & Media ({articles.length})
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {articles.map((article, idx) => {
+                const sentimentInfo = getSentimentBadge(article.sentiment)
+                const SentimentIcon = sentimentInfo.icon
+                return (
+                  <div key={idx} className="p-3 rounded-lg border border-border/50 bg-secondary/30">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <SentimentIcon className="w-3 h-3" />
+                          <Badge className={`text-xs ${sentimentInfo.className}`}>
+                            {article.sentiment || 'neutral'}
+                          </Badge>
+                          {article.source && (
+                            <span className="text-xs text-muted-foreground">{article.source}</span>
+                          )}
+                        </div>
+                        <p className="text-sm font-medium text-foreground">{article.title || 'Untitled Article'}</p>
+                        {article.summary && (
+                          <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{article.summary}</p>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {article.article_published_date && (
+                          <span className="text-xs text-muted-foreground whitespace-nowrap">{article.article_published_date}</span>
+                        )}
+                        {article.url && (
+                          <a href={article.url} target="_blank" rel="noopener noreferrer" className="text-primary hover:text-primary/80">
+                            <ExternalLink className="w-3 h-3" />
+                          </a>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Reasoning */}
-      <Card className="glass">
-        <CardHeader>
-          <CardTitle className="text-base">Analysis & Reasoning</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground">
-            Backed by reputable Canadian and fintech-focused VCs (Luge, Brightspark, Graphite) with repeated positive
-            coverage in SecurityWeek, BetaKit, and others. Listed in Canadian cyber directories and VC portfolios as a
-            core security asset. No negative media coverage found.
-          </p>
-          <div className="mt-4 p-3 rounded-lg bg-accent/10 border border-accent/20">
-            <div className="font-medium text-foreground text-sm">Recommendation</div>
-            <p className="text-sm text-muted-foreground mt-1">
-              Validate that public messaging matches actual product maturity—ask for reference customers similar to your
-              profile. Confirm they themselves obtain SOC 2 / ISO attestations, not just help customers achieve them.
-            </p>
-          </div>
-        </CardContent>
-      </Card>
+      {reasoning && (
+        <Card className="glass">
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4" />
+              Analysis & Reasoning
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground leading-relaxed">{reasoning}</p>
+          </CardContent>
+        </Card>
+      )}
     </div>
   )
 }

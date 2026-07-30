@@ -11,6 +11,7 @@ import { Card } from "@/components/ui/card"
 import { Send, Bot, User, Copy, Check } from "lucide-react"
 import { DocumentSelector } from "./document-selector"
 import { supabase } from "@/lib/supabase"
+import { getApiBaseUrl } from "@/lib/api"
 
 interface Message {
   id: string
@@ -87,7 +88,7 @@ export function ChatInterface() {
         return
       }
 
-      const response = await fetch('/api/documents', {
+      const response = await fetch(`${getApiBaseUrl()}/api/documents`, {
         method: 'GET',
         headers: {
           'Authorization': `Bearer ${session.access_token}`,
@@ -204,7 +205,7 @@ export function ChatInterface() {
       abortControllerRef.current = abortController
 
       // Use streaming endpoint for real-time response
-      const response = await fetch('/api/chat/stream', {
+      const response = await fetch(`${getApiBaseUrl()}/api/chat/stream`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${session.access_token}`,
@@ -284,7 +285,7 @@ export function ChatInterface() {
 
       // If no content was streamed, try non-streaming fallback
       if (!accumulatedContent) {
-        const fallbackResponse = await fetch('/api/chat', {
+        const fallbackResponse = await fetch(`${getApiBaseUrl()}/api/chat`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${session.access_token}`,

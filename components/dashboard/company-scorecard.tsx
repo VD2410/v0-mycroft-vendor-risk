@@ -378,19 +378,19 @@ export function CompanyScorecard({ companyId }: CompanyScorecardProps) {
           <OverviewTab company={company} scores={scores} signals={signals} />
         </TabsContent>
         <TabsContent value="technology">
-          <TechnologyTab />
+          <TechnologyTab techStack={detailData?.techStack} score={scores.scores.cyberThreat?.score} />
         </TabsContent>
         <TabsContent value="vulnerabilities">
-          <VulnerabilitiesTab />
+          <VulnerabilitiesTab vulnerabilities={detailData?.vulnerabilities || []} score={scores.scores.vulnerability?.score} reasoning={scores.scores.vulnerability?.justification} />
         </TabsContent>
         <TabsContent value="vendors">
-          <VendorsTab />
+          <VendorsTab vendors={detailData?.vendors || []} score={scores.scores.thirdParty?.score} reasoning={scores.scores.thirdParty?.justification} />
         </TabsContent>
         <TabsContent value="darkweb">
-          <DarkWebTab />
+          <DarkWebTab dataLeaks={detailData?.dataLeaks || []} score={scores.scores.darkWeb?.score} reasoning={scores.scores.darkWeb?.justification} />
         </TabsContent>
         <TabsContent value="sentiment">
-          <SentimentTab />
+          <SentimentTab articles={detailData?.articles || []} score={scores.scores.reputation?.score} reasoning={scores.scores.reputation?.justification} />
         </TabsContent>
         <TabsContent value="actions">
           <ActionsTab actions={recommendedActions} />

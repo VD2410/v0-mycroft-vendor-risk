@@ -3,121 +3,163 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
-import { Users, AlertTriangle } from "lucide-react"
+import { Users, Building2, AlertTriangle, ShieldCheck } from "lucide-react"
 
-const peerComparison = [
-  { name: "Vanta", founded: "2018", customers: "12,000+", funding: "$500M+", incidents: "Cross-tenant bug (2025)" },
-  { name: "Drata", founded: "2020", customers: "5,000+", funding: "$328M", incidents: "None public" },
-  { name: "Thoropass", founded: "2019", customers: "1,000+", funding: "$98M", incidents: "None public" },
-  { name: "Scrut", founded: "2022", customers: "500+", funding: "$11M", incidents: "None public" },
-  { name: "Mycroft", founded: "2024", customers: "N/A", funding: "~$3.5M", incidents: "None public" },
-]
+interface Vendor {
+  name: string
+  domain?: string
+  industry?: string
+  vendor_security_score?: number
+  critical_tier?: string
+}
 
-export function VendorsTab() {
+interface VendorsTabProps {
+  vendors: Vendor[]
+  score?: number
+  reasoning?: string
+}
+
+export function VendorsTab({ vendors, score, reasoning }: VendorsTabProps) {
+  const displayScore = score ?? 0
+
+  const getRiskColor = (s: number) => {
+    if (s >= 80) return "text-emerald-600"
+    if (s >= 60) return "text-cyan-600"
+    if (s >= 40) return "text-amber-600"
+    return "text-red-600"
+  }
+
+  const getVendorScoreColor = (s?: number) => {
+    if (!s) return "text-muted-foreground"
+    if (s >= 80) return "text-emerald-600"
+    if (s >= 60) return "text-cyan-600"
+    if (s >= 40) return "text-amber-600"
+    return "text-red-600"
+  }
+
+  const getTierBadge = (tier?: string) => {
+    const t = (tier || '').toLowerCase()
+    if (t.includes('critical') || t === '1') return "bg-red-100 text-red-700 border-red-200"
+    if (t.includes('high') || t === '2') return "bg-orange-100 text-orange-700 border-orange-200"
+    if (t.includes('medium') || t === '3') return "bg-amber-100 text-amber-700 border-amber-200"
+    return "bg-green-100 text-green-700 border-green-200"
+  }
+
+  const criticalVendors = vendors.filter(v => v.vendor_security_score !== undefined && v.vendor_security_score < 50)
+  const avgScore = vendors.length > 0
+    ? Math.round(vendors.reduce((sum, v) => sum + (v.vendor_security_score || 0), 0) / vendors.filter(v => v.vendor_security_score).length)
+    : 0
+
   return (
     <div className="space-y-6">
       {/* Score Card */}
       <Card className="glass">
         <CardContent className="pt-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-chart-2/20 flex items-center justify-center">
-                <Users className="w-6 h-6 text-chart-2" />
-              </div>
-              <div>
-                <div className="text-2xl font-bold text-chart-2">58/100</div>
-                <div className="text-sm text-muted-foreground">Third-Party Risk Score</div>
-              </div>
-            </div>
-            <Badge className="bg-chart-2/20 text-chart-2 border-chart-2/30">Elevated Risk</Badge>
-          </div>
-          <Progress value={58} className="h-2 mt-4" />
-        </CardContent>
-      </Card>
-
-      {/* Key Finding */}
-      <Card className="glass border-chart-2/30">
-        <CardContent className="pt-6">
-          <div className="flex items-start gap-3">
-            <AlertTriangle className="w-5 h-5 text-chart-2 mt-0.5" />
+          <div className="flex items-center justify-between mb-4">
             <div>
-              <div className="font-semibold text-foreground">High Integration Surface</div>
-              <p className="text-sm text-muted-foreground mt-1">
-                150–250+ integrations across cloud, identity, SCM, ticketing, etc. This creates significant blast radius
-                if their platform is compromised—similar architectural risk to Vanta/Drata but with less historical
-                proof of secure operation.
-              </p>
+              <h3 className="text-lg font-semibold text-foreground">Third-Party Risk Score</h3>
+              <p className="text-sm text-muted-foreground">Based on vendor security posture analysis</p>
             </div>
+            <div className={`text-4xl font-bold ${getRiskColor(displayScore)}`}>{displayScore}<span className="text-lg text-muted-foreground">/100</span></div>
           </div>
+          <Progress value={displayScore} className="h-2" />
         </CardContent>
       </Card>
 
-      {/* Peer Comparison */}
-      <Card className="glass">
-        <CardHeader>
-          <CardTitle className="text-base">Risk Peer Comparison</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-border">
-                  <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Vendor</th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Founded</th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Customers</th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Funding</th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Known Incidents</th>
-                </tr>
-              </thead>
-              <tbody>
-                {peerComparison.map((peer) => (
-                  <tr
-                    key={peer.name}
-                    className={`border-b border-border/50 ${peer.name === "Mycroft" ? "bg-accent/10" : ""}`}
-                  >
-                    <td className="py-3 px-4 text-sm font-medium text-foreground">
-                      {peer.name}
-                      {peer.name === "Mycroft" && <Badge className="ml-2 bg-accent/20 text-accent">Subject</Badge>}
-                    </td>
-                    <td className="py-3 px-4 text-sm text-muted-foreground">{peer.founded}</td>
-                    <td className="py-3 px-4 text-sm text-muted-foreground">{peer.customers}</td>
-                    <td className="py-3 px-4 text-sm text-muted-foreground">{peer.funding}</td>
-                    <td className="py-3 px-4 text-sm">
-                      {peer.incidents === "None public" ? (
-                        <span className="text-chart-1">{peer.incidents}</span>
-                      ) : (
-                        <span className="text-chart-2">{peer.incidents}</span>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Summary Stats */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <Card className="glass">
+          <CardContent className="pt-4 text-center">
+            <div className="text-2xl font-bold text-foreground">{vendors.length}</div>
+            <div className="text-xs text-muted-foreground">Total Vendors</div>
+          </CardContent>
+        </Card>
+        <Card className="glass">
+          <CardContent className="pt-4 text-center">
+            <div className="text-2xl font-bold text-red-600">{criticalVendors.length}</div>
+            <div className="text-xs text-muted-foreground">High Risk</div>
+          </CardContent>
+        </Card>
+        <Card className="glass">
+          <CardContent className="pt-4 text-center">
+            <div className={`text-2xl font-bold ${getVendorScoreColor(avgScore)}`}>{avgScore || 'N/A'}</div>
+            <div className="text-xs text-muted-foreground">Avg Score</div>
+          </CardContent>
+        </Card>
+        <Card className="glass">
+          <CardContent className="pt-4 text-center">
+            <div className="text-2xl font-bold text-foreground">{[...new Set(vendors.map(v => v.industry).filter(Boolean))].length}</div>
+            <div className="text-xs text-muted-foreground">Industries</div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Vendors List */}
+      {vendors.length === 0 ? (
+        <Card className="glass">
+          <CardContent className="pt-6 text-center">
+            <ShieldCheck className="w-12 h-12 text-emerald-500 mx-auto mb-3" />
+            <h3 className="text-lg font-semibold text-foreground mb-1">No Vendor Data Available</h3>
+            <p className="text-sm text-muted-foreground">Third-party vendor information has not been collected for this company yet.</p>
+          </CardContent>
+        </Card>
+      ) : (
+        <Card className="glass">
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <Users className="w-4 h-4" />
+              Third-Party Vendors ({vendors.length})
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              {vendors.map((vendor, idx) => (
+                <div key={idx} className="flex items-center justify-between p-3 rounded-lg border border-border/50 bg-secondary/30 hover:bg-secondary/50 transition-colors">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                      <Building2 className="w-5 h-5 text-primary" />
+                    </div>
+                    <div>
+                      <div className="text-sm font-medium text-foreground">{vendor.name}</div>
+                      <div className="text-xs text-muted-foreground">
+                        {vendor.domain && <span>{vendor.domain}</span>}
+                        {vendor.industry && <span> · {vendor.industry}</span>}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    {vendor.critical_tier && (
+                      <Badge className={`text-xs ${getTierBadge(vendor.critical_tier)}`}>
+                        Tier {vendor.critical_tier}
+                      </Badge>
+                    )}
+                    {vendor.vendor_security_score !== undefined && (
+                      <div className={`text-lg font-bold ${getVendorScoreColor(vendor.vendor_security_score)}`}>
+                        {vendor.vendor_security_score}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Reasoning */}
-      <Card className="glass">
-        <CardHeader>
-          <CardTitle className="text-base">Analysis & Reasoning</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground">
-            Mycroft's value comes from deep integration into cloud, SCM, identity, HRIS, and ticketing systems. This
-            creates significant blast radius if compromised. For RiskAssure's modelling, rate Mycroft's intrinsic
-            architectural risk similar to Vanta/Drata, but adjust the confidence interval wider due to shorter history
-            and fewer third-party data points.
-          </p>
-          <div className="mt-4 p-3 rounded-lg bg-chart-2/10 border border-chart-2/20">
-            <div className="font-medium text-foreground text-sm">Mitigation Suggestion</div>
-            <p className="text-sm text-muted-foreground mt-1">
-              Treat Mycroft as a "Tier-1 critical vendor" in your own TPRM. Require detailed data-flow diagrams per
-              integration. Enforce least-privilege integration scopes and strong key rotation.
-            </p>
-          </div>
-        </CardContent>
-      </Card>
+      {reasoning && (
+        <Card className="glass">
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4" />
+              Analysis & Reasoning
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground leading-relaxed">{reasoning}</p>
+          </CardContent>
+        </Card>
+      )}
     </div>
   )
 }

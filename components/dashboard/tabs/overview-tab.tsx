@@ -123,16 +123,13 @@ export function OverviewTab({ company, scores, signals }: OverviewTabProps) {
         </CardHeader>
         <CardContent>
           <p className="text-muted-foreground leading-relaxed">
-            Based on open-source intelligence as of 8 Dec 2025, <strong className="text-foreground">Mycroft</strong>{" "}
-            (mycroft.io) is a 2024-founded, Toronto-based, AI-native security and compliance SaaS platform that
-            positions itself as an "AI Security and Compliance Officer" consolidating cloud security, device management,
-            GRC, and audit readiness for B2B SaaS and similar companies. No public evidence of breaches or CVEs specific
-            to Mycroft's current platform was found. Mycroft's extensive integration surface (150–250+ SaaS and cloud
-            platforms) and agentic automation create meaningful concentration and third-party risk, but the company is
-            backed by notable cybersecurity/fintech investors and is clearly oriented around SOC 2 / ISO 27001-style
-            controls. Overall, we assess Mycroft's vendor risk as <strong className="text-chart-4">Moderate</strong>{" "}
-            versus peers like Vanta, Drata, Thoropass, and Scrut—comparable architectural risk, but with a shorter
-            operational track record and smaller footprint.
+            Based on open-source intelligence analysis, <strong className="text-foreground">{company.name}</strong>{" "}
+            ({company.domain}){company.location ? `, headquartered in ${company.location}` : ''}{company.industry ? `, operating in the ${company.industry} sector` : ''}, has been assessed across multiple risk dimensions.
+            {scores.overallScore >= 80 && " The organization demonstrates strong cybersecurity posture with minimal identified risks. No critical vulnerabilities or significant dark web exposure were detected."}
+            {scores.overallScore >= 60 && scores.overallScore < 80 && " The organization shows a moderate cybersecurity posture with some areas requiring attention. While no critical breaches were identified, certain risk factors warrant monitoring."}
+            {scores.overallScore >= 40 && scores.overallScore < 60 && " The organization presents elevated cybersecurity risk across multiple dimensions. Several areas require immediate attention to reduce exposure."}
+            {scores.overallScore < 40 && " The organization presents critical cybersecurity risk. Immediate remediation is recommended across multiple risk categories to prevent potential breaches."}
+            {signals.length > 0 && ` Key findings include ${signals.length} notable signal${signals.length > 1 ? 's' : ''} across ${[...new Set(signals.map(s => s.category))].join(', ')} categories.`}
           </p>
         </CardContent>
       </Card>

@@ -3,134 +3,160 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
-import { Bug, AlertTriangle, CheckCircle, Info } from "lucide-react"
+import { Bug, ShieldCheck, AlertTriangle } from "lucide-react"
 
-const cveFindings = [
-  {
-    cve: "Legacy CVE-2019-xxxx",
-    product: "Mycroft AI mycroft-core",
-    severity: "N/A",
-    status: "Unrelated",
-    notes: "Historical CVEs for the legacy open-source voice assistant project, not this company's platform.",
-  },
-]
+interface Vulnerability {
+  cve_id?: string
+  title?: string
+  severity?: string
+  cvss_score?: number
+  description?: string
+  published_date?: string
+  patch_available?: boolean
+}
 
-export function VulnerabilitiesTab() {
+interface VulnerabilitiesTabProps {
+  vulnerabilities: Vulnerability[]
+  score?: number
+  reasoning?: string
+}
+
+export function VulnerabilitiesTab({ vulnerabilities, score, reasoning }: VulnerabilitiesTabProps) {
+  const displayScore = score ?? 0
+
+  const getRiskColor = (s: number) => {
+    if (s >= 80) return "text-emerald-600"
+    if (s >= 60) return "text-cyan-600"
+    if (s >= 40) return "text-amber-600"
+    return "text-red-600"
+  }
+
+  const getSeverityBadge = (severity?: string) => {
+    const s = (severity || '').toLowerCase()
+    if (s === 'critical') return "bg-red-100 text-red-700 border-red-200"
+    if (s === 'high') return "bg-orange-100 text-orange-700 border-orange-200"
+    if (s === 'medium') return "bg-amber-100 text-amber-700 border-amber-200"
+    return "bg-green-100 text-green-700 border-green-200"
+  }
+
+  const criticalCount = vulnerabilities.filter(v => (v.severity || '').toLowerCase() === 'critical').length
+  const highCount = vulnerabilities.filter(v => (v.severity || '').toLowerCase() === 'high').length
+  const mediumCount = vulnerabilities.filter(v => (v.severity || '').toLowerCase() === 'medium').length
+  const lowCount = vulnerabilities.filter(v => !['critical', 'high', 'medium'].includes((v.severity || '').toLowerCase())).length
+
   return (
     <div className="space-y-6">
       {/* Score Card */}
       <Card className="glass">
         <CardContent className="pt-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-chart-1/20 flex items-center justify-center">
-                <Bug className="w-6 h-6 text-chart-1" />
-              </div>
-              <div>
-                <div className="text-2xl font-bold text-chart-1">65/100</div>
-                <div className="text-sm text-muted-foreground">Vulnerability Score</div>
-              </div>
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h3 className="text-lg font-semibold text-foreground">Vulnerability Score</h3>
+              <p className="text-sm text-muted-foreground">Based on CVE analysis and patch status</p>
             </div>
-            <Badge className="bg-chart-1/20 text-chart-1 border-chart-1/30">Low Exposure</Badge>
+            <div className={`text-4xl font-bold ${getRiskColor(displayScore)}`}>{displayScore}<span className="text-lg text-muted-foreground">/100</span></div>
           </div>
-          <Progress value={65} className="h-2 mt-4" />
+          <Progress value={displayScore} className="h-2" />
         </CardContent>
       </Card>
 
-      <div className="grid lg:grid-cols-3 gap-6">
-        {/* Stats */}
+      {/* Summary Stats */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card className="glass">
-          <CardContent className="pt-6 text-center">
-            <CheckCircle className="w-10 h-10 text-chart-1 mx-auto mb-2" />
-            <div className="text-3xl font-bold text-foreground">0</div>
-            <div className="text-sm text-muted-foreground">Platform-Specific CVEs</div>
+          <CardContent className="pt-4 text-center">
+            <div className="text-2xl font-bold text-red-600">{criticalCount}</div>
+            <div className="text-xs text-muted-foreground">Critical</div>
           </CardContent>
         </Card>
         <Card className="glass">
-          <CardContent className="pt-6 text-center">
-            <Info className="w-10 h-10 text-chart-4 mx-auto mb-2" />
-            <div className="text-3xl font-bold text-foreground">N/A</div>
-            <div className="text-sm text-muted-foreground">Active Exploits</div>
+          <CardContent className="pt-4 text-center">
+            <div className="text-2xl font-bold text-orange-600">{highCount}</div>
+            <div className="text-xs text-muted-foreground">High</div>
           </CardContent>
         </Card>
         <Card className="glass">
-          <CardContent className="pt-6 text-center">
-            <AlertTriangle className="w-10 h-10 text-muted-foreground mx-auto mb-2" />
-            <div className="text-3xl font-bold text-foreground">Limited</div>
-            <div className="text-sm text-muted-foreground">OSINT Coverage</div>
+          <CardContent className="pt-4 text-center">
+            <div className="text-2xl font-bold text-amber-600">{mediumCount}</div>
+            <div className="text-xs text-muted-foreground">Medium</div>
+          </CardContent>
+        </Card>
+        <Card className="glass">
+          <CardContent className="pt-4 text-center">
+            <div className="text-2xl font-bold text-green-600">{lowCount}</div>
+            <div className="text-xs text-muted-foreground">Low</div>
           </CardContent>
         </Card>
       </div>
 
-      {/* CVE Table */}
-      <Card className="glass">
-        <CardHeader>
-          <CardTitle className="text-base">CVE Database Findings</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-border">
-                  <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">CVE Reference</th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Product</th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Severity</th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Status</th>
-                  <th className="text-left py-3 px-4 text-sm font-medium text-muted-foreground">Notes</th>
-                </tr>
-              </thead>
-              <tbody>
-                {cveFindings.map((cve, i) => (
-                  <tr key={i} className="border-b border-border/50">
-                    <td className="py-3 px-4 text-sm font-mono text-foreground">{cve.cve}</td>
-                    <td className="py-3 px-4 text-sm text-foreground">{cve.product}</td>
-                    <td className="py-3 px-4">
-                      <Badge variant="secondary">{cve.severity}</Badge>
-                    </td>
-                    <td className="py-3 px-4">
-                      <Badge className="bg-secondary text-secondary-foreground">{cve.status}</Badge>
-                    </td>
-                    <td className="py-3 px-4 text-sm text-muted-foreground max-w-xs">{cve.notes}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <div className="mt-4 p-3 rounded-lg bg-chart-1/10 border border-chart-1/20">
-            <div className="flex items-start gap-2">
-              <CheckCircle className="w-4 h-4 text-chart-1 mt-0.5" />
-              <div>
-                <div className="font-medium text-foreground text-sm">No Platform CVEs Identified</div>
-                <p className="text-sm text-muted-foreground mt-1">
-                  No public platform-specific CVEs for mycroft.io identified. Historical CVEs exist for the unrelated
-                  "Mycroft AI mycroft-core" open-source voice assistant.
-                </p>
-              </div>
+      {/* Vulnerabilities List */}
+      {vulnerabilities.length === 0 ? (
+        <Card className="glass">
+          <CardContent className="pt-6 text-center">
+            <ShieldCheck className="w-12 h-12 text-emerald-500 mx-auto mb-3" />
+            <h3 className="text-lg font-semibold text-foreground mb-1">No Known Vulnerabilities</h3>
+            <p className="text-sm text-muted-foreground">No CVEs or known vulnerabilities were detected for this company&apos;s infrastructure.</p>
+          </CardContent>
+        </Card>
+      ) : (
+        <Card className="glass">
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <Bug className="w-4 h-4" />
+              Detected Vulnerabilities ({vulnerabilities.length})
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {vulnerabilities.map((vuln, idx) => (
+                <div key={idx} className="p-3 rounded-lg border border-border/50 bg-secondary/30">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        {vuln.cve_id && (
+                          <Badge variant="outline" className="text-xs font-mono">{vuln.cve_id}</Badge>
+                        )}
+                        <Badge className={`text-xs ${getSeverityBadge(vuln.severity)}`}>
+                          {vuln.severity || 'Unknown'}
+                        </Badge>
+                        {vuln.patch_available && (
+                          <Badge variant="outline" className="text-xs bg-emerald-50 text-emerald-700 border-emerald-200">Patch Available</Badge>
+                        )}
+                      </div>
+                      <p className="text-sm font-medium text-foreground">{vuln.title || vuln.cve_id || 'Vulnerability'}</p>
+                      {vuln.description && (
+                        <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{vuln.description}</p>
+                      )}
+                    </div>
+                    {vuln.cvss_score && (
+                      <div className="text-right">
+                        <div className={`text-lg font-bold ${vuln.cvss_score >= 9 ? 'text-red-600' : vuln.cvss_score >= 7 ? 'text-orange-600' : 'text-amber-600'}`}>
+                          {vuln.cvss_score}
+                        </div>
+                        <div className="text-xs text-muted-foreground">CVSS</div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
             </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Reasoning */}
-      <Card className="glass">
-        <CardHeader>
-          <CardTitle className="text-base">Analysis & Reasoning</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-muted-foreground">
-            No platform-specific CVEs identified. Agentic AI and heavy automation can both reduce and introduce risk
-            depending on control design. The absence of evidence does not equal absence of vulnerabilities—this is a
-            weak positive indicator only.
-          </p>
-          <div className="mt-4 p-3 rounded-lg bg-accent/10 border border-accent/20">
-            <div className="font-medium text-foreground text-sm">Mitigation Suggestion</div>
-            <p className="text-sm text-muted-foreground mt-1">
-              Include mandatory annual third-party pentest + fix SLAs in contract. Request SAST/DAST results and verify
-              secure SDLC practices.
-            </p>
-          </div>
-        </CardContent>
-      </Card>
+      {reasoning && (
+        <Card className="glass">
+          <CardHeader>
+            <CardTitle className="text-base flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4" />
+              Analysis & Reasoning
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground leading-relaxed">{reasoning}</p>
+          </CardContent>
+        </Card>
+      )}
     </div>
   )
 }

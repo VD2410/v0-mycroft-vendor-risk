@@ -3,133 +3,144 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
-import { Code, Cloud, Lock, GitBranch, Server } from "lucide-react"
+import { Cpu, Server, Shield, Globe } from "lucide-react"
 
-const techStack = [
-  { category: "Cloud Providers", items: ["AWS", "Azure", "GCP"], icon: Cloud },
-  { category: "Source Control", items: ["GitHub", "GitLab", "Bitbucket"], icon: GitBranch },
-  { category: "Identity Providers", items: ["Okta", "Azure AD", "Google Workspace"], icon: Lock },
-  { category: "Infrastructure", items: ["API Gateway", "Serverless Functions", "CDN"], icon: Server },
-]
+interface TechItem {
+  name: string
+  category?: string
+  source?: string
+  confidence?: string
+}
 
-const integrations = [
-  { name: "AWS", type: "Cloud", risk: "Medium", access: "Read/Write" },
-  { name: "Azure", type: "Cloud", risk: "Medium", access: "Read/Write" },
-  { name: "GCP", type: "Cloud", risk: "Medium", access: "Read/Write" },
-  { name: "GitHub", type: "SCM", risk: "High", access: "Read/Write" },
-  { name: "GitLab", type: "SCM", risk: "High", access: "Read/Write" },
-  { name: "Okta", type: "Identity", risk: "Critical", access: "Read" },
-  { name: "Jira", type: "Ticketing", risk: "Low", access: "Read/Write" },
-  { name: "Slack", type: "Messaging", risk: "Low", access: "Read" },
-]
+interface TechnologyTabProps {
+  techStack?: {
+    stack?: TechItem[]
+  }
+  score?: number
+}
 
-export function TechnologyTab() {
+const categoryIcons: Record<string, any> = {
+  "Web Framework": Globe,
+  "Programming Language": Cpu,
+  "Server": Server,
+  "Security": Shield,
+  "CDN": Globe,
+  "CMS": Globe,
+  "Analytics": Cpu,
+  "JavaScript Framework": Cpu,
+}
+
+const categoryColors: Record<string, string> = {
+  "Web Framework": "bg-blue-100 text-blue-700 border-blue-200",
+  "Programming Language": "bg-purple-100 text-purple-700 border-purple-200",
+  "Server": "bg-green-100 text-green-700 border-green-200",
+  "Security": "bg-emerald-100 text-emerald-700 border-emerald-200",
+  "CDN": "bg-orange-100 text-orange-700 border-orange-200",
+  "CMS": "bg-pink-100 text-pink-700 border-pink-200",
+  "Analytics": "bg-cyan-100 text-cyan-700 border-cyan-200",
+  "JavaScript Framework": "bg-yellow-100 text-yellow-700 border-yellow-200",
+}
+
+export function TechnologyTab({ techStack, score }: TechnologyTabProps) {
+  const stack = techStack?.stack || []
+  const displayScore = score ?? 0
+
+  // Group technologies by category
+  const grouped = stack.reduce((acc: Record<string, TechItem[]>, item) => {
+    const cat = item.category || "Other"
+    if (!acc[cat]) acc[cat] = []
+    acc[cat].push(item)
+    return acc
+  }, {})
+
+  const getRiskColor = (s: number) => {
+    if (s >= 80) return "text-emerald-600"
+    if (s >= 60) return "text-cyan-600"
+    if (s >= 40) return "text-amber-600"
+    return "text-red-600"
+  }
+
   return (
     <div className="space-y-6">
       {/* Score Card */}
       <Card className="glass">
         <CardContent className="pt-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-chart-4/20 flex items-center justify-center">
-                <Code className="w-6 h-6 text-chart-4" />
-              </div>
-              <div>
-                <div className="text-2xl font-bold text-chart-4">65/100</div>
-                <div className="text-sm text-muted-foreground">Technology Exposure Score</div>
-              </div>
+          <div className="flex items-center justify-between mb-4">
+            <div>
+              <h3 className="text-lg font-semibold text-foreground">Technology Security Score</h3>
+              <p className="text-sm text-muted-foreground">Based on detected technology stack analysis</p>
             </div>
-            <Badge className="bg-chart-4/20 text-chart-4 border-chart-4/30">Moderate Exposure</Badge>
+            <div className={`text-4xl font-bold ${getRiskColor(displayScore)}`}>{displayScore}<span className="text-lg text-muted-foreground">/100</span></div>
           </div>
-          <Progress value={65} className="h-2 mt-4" />
+          <Progress value={displayScore} className="h-2" />
         </CardContent>
       </Card>
 
-      <div className="grid lg:grid-cols-2 gap-6">
-        {/* Tech Stack */}
+      {/* Technology Stack */}
+      {stack.length === 0 ? (
         <Card className="glass">
-          <CardHeader>
-            <CardTitle className="text-base">Detected Technology Stack</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {techStack.map((category) => (
-              <div key={category.category} className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <category.icon className="w-4 h-4 text-muted-foreground" />
-                  <span className="text-sm font-medium text-foreground">{category.category}</span>
-                </div>
-                <div className="flex flex-wrap gap-2 pl-6">
-                  {category.items.map((item) => (
-                    <Badge key={item} variant="secondary">
-                      {item}
-                    </Badge>
+          <CardContent className="pt-6 text-center">
+            <Cpu className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+            <h3 className="text-lg font-semibold text-foreground mb-1">No Technology Data Available</h3>
+            <p className="text-sm text-muted-foreground">Technology stack information has not been collected for this company yet.</p>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid md:grid-cols-2 gap-4">
+          {Object.entries(grouped).map(([category, items]) => {
+            const IconComponent = categoryIcons[category] || Cpu
+            const colorClass = categoryColors[category] || "bg-gray-100 text-gray-700 border-gray-200"
+            return (
+              <Card key={category} className="glass">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-sm flex items-center gap-2">
+                    <IconComponent className="w-4 h-4" />
+                    {category}
+                    <Badge variant="outline" className="ml-auto text-xs">{items.length}</Badge>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  {items.map((tech, idx) => (
+                    <div key={idx} className="flex items-center justify-between py-1.5 border-b border-border/50 last:border-0">
+                      <span className="text-sm font-medium text-foreground">{tech.name}</span>
+                      <div className="flex items-center gap-2">
+                        {tech.confidence && (
+                          <Badge variant="outline" className={`text-xs ${colorClass}`}>
+                            {tech.confidence}
+                          </Badge>
+                        )}
+                        {tech.source && (
+                          <span className="text-xs text-muted-foreground">{tech.source}</span>
+                        )}
+                      </div>
+                    </div>
                   ))}
-                </div>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
+                </CardContent>
+              </Card>
+            )
+          })}
+        </div>
+      )}
 
-        {/* Integration Surface */}
-        <Card className="glass">
-          <CardHeader>
-            <CardTitle className="text-base">Integration Surface (150-250+ tools)</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              {integrations.map((int) => (
-                <div key={int.name} className="flex items-center justify-between p-2 rounded-lg bg-secondary/50">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded bg-accent/20 flex items-center justify-center text-xs font-mono text-accent">
-                      {int.name.slice(0, 2)}
-                    </div>
-                    <div>
-                      <div className="text-sm font-medium text-foreground">{int.name}</div>
-                      <div className="text-xs text-muted-foreground">{int.type}</div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Badge
-                      variant="outline"
-                      className={
-                        int.risk === "Critical"
-                          ? "border-destructive/50 text-destructive"
-                          : int.risk === "High"
-                            ? "border-chart-2/50 text-chart-2"
-                            : int.risk === "Medium"
-                              ? "border-chart-4/50 text-chart-4"
-                              : "border-chart-1/50 text-chart-1"
-                      }
-                    >
-                      {int.risk}
-                    </Badge>
-                    <span className="text-xs text-muted-foreground">{int.access}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Reasoning */}
+      {/* Summary */}
       <Card className="glass">
         <CardHeader>
-          <CardTitle className="text-base">Analysis & Reasoning</CardTitle>
+          <CardTitle className="text-base">Technology Assessment</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground">
-            AI-native platform with agentic automation; integrates with AWS, Azure, GCP, GitHub, GitLab, Bitbucket and
-            ~150–250+ tools; performs cloud config checks, device management, codebase and infra scans, evidence
-            collection via APIs. This extensive integration surface creates significant blast radius if the platform is
-            compromised—similar to competitors Vanta and Drata but with less historical proof of secure operation.
-          </p>
-          <div className="mt-4 p-3 rounded-lg bg-chart-4/10 border border-chart-4/20">
-            <div className="font-medium text-foreground text-sm">Mitigation Suggestion</div>
-            <p className="text-sm text-muted-foreground mt-1">
-              Ask for independent AppSec results (SAST/DAST, supply-chain scanning). Verify secure SDLC and how they
-              test their agents' actions.
-            </p>
+          <div className="grid md:grid-cols-3 gap-4 text-center">
+            <div>
+              <div className="text-2xl font-bold text-foreground">{stack.length}</div>
+              <div className="text-sm text-muted-foreground">Technologies Detected</div>
+            </div>
+            <div>
+              <div className="text-2xl font-bold text-foreground">{Object.keys(grouped).length}</div>
+              <div className="text-sm text-muted-foreground">Categories</div>
+            </div>
+            <div>
+              <div className={`text-2xl font-bold ${getRiskColor(displayScore)}`}>{displayScore >= 80 ? 'Low' : displayScore >= 60 ? 'Moderate' : displayScore >= 40 ? 'High' : 'Critical'}</div>
+              <div className="text-sm text-muted-foreground">Risk Level</div>
+            </div>
           </div>
         </CardContent>
       </Card>

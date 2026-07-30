@@ -15,6 +15,8 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { useRouter } from "next/navigation"
 import { supabase } from "@/lib/supabase"
+import { getApiBaseUrl } from "@/lib/api"
+import { toast } from "sonner"
 import Link from "next/link"
 
 interface UserInfo {
@@ -67,7 +69,7 @@ export function DashboardHeader() {
   const fetchCompanies = useCallback(async (uid: string, retryCount = 0) => {
     try {
       setLoadingCompanies(true)
-      const response = await fetch(`/api/v1/user/${uid}/companies`)
+      const response = await fetch(`${getApiBaseUrl()}/api/v1/user/${uid}/companies`)
       if (response.ok) {
         const data = await response.json()
         if (data.status && data.body?.length > 0) {
@@ -132,7 +134,7 @@ export function DashboardHeader() {
 
     // Set primary on backend
     try {
-      await fetch(`/api/v1/user/${userInfo.id}/companies/${company.company_id}/set-primary`, {
+      await fetch(`${getApiBaseUrl()}/api/v1/user/${userInfo.id}/companies/${company.company_id}/set-primary`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({})
@@ -304,7 +306,7 @@ export function DashboardHeader() {
 
       {/* Right side: notifications + user menu */}
       <div className="flex items-center gap-2">
-        <Button variant="ghost" size="icon" className="relative" onClick={() => { const event = new CustomEvent('show-toast', { detail: { message: 'No new notifications' } }); window.dispatchEvent(event); }}>
+        <Button variant="ghost" size="icon" className="relative" onClick={() => { toast.info('No new notifications'); }}>
           <Bell className="w-5 h-5" />
         </Button>
 

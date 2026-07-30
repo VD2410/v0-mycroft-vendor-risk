@@ -1,6 +1,8 @@
 // Custom auth client that replaces Supabase with direct backend API calls
 // This mimics the Supabase client API surface so existing code doesn't need changes
 
+import { getApiBaseUrl } from './api'
+
 const STORAGE_KEY = 'sb-ytvidsvbaymukrzzfnab-auth-token'
 
 interface User {
@@ -47,7 +49,7 @@ class AuthClient {
 
   async signInWithPassword({ email, password }: { email: string; password: string }): Promise<AuthResponse> {
     try {
-      const response = await fetch('/api/auth/login', {
+      const response = await fetch(`${getApiBaseUrl()}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
@@ -100,7 +102,7 @@ class AuthClient {
         body.companyDomain = options.data.company_domain || options.data.companyDomain || options.data.website_url || ''
       }
 
-      const response = await fetch('/api/auth/register', {
+      const response = await fetch(`${getApiBaseUrl()}/api/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),

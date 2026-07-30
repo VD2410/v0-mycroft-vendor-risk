@@ -57,7 +57,7 @@ export function DocumentsPage() {
       if (!session?.access_token) { setError("Please sign in to view documents"); setIsLoading(false); return }
       const companyId = localStorage.getItem('wisr_company_id')
       if (!companyId) { setError("No company selected"); setIsLoading(false); return }
-      const response = await fetch(`/api/documents?companyId=${companyId}`, { headers: { 'Authorization': `Bearer ${session.access_token}` } })
+      const response = await fetch(`${getApiBaseUrl()}/api/documents?companyId=${companyId}`, { headers: { 'Authorization': `Bearer ${session.access_token}` } })
       if (response.ok) {
         const data = await response.json()
         // Handle multiple response formats
@@ -94,7 +94,7 @@ export function DocumentsPage() {
         const formData = new FormData()
         formData.append('file', files[i])
         formData.append('companyId', companyId)
-        const response = await fetch(`/api/documents/upload`, { method: 'POST', headers: { 'Authorization': `Bearer ${session.access_token}` }, body: formData })
+        const response = await fetch(`${getApiBaseUrl()}/api/documents/upload`, { method: 'POST', headers: { 'Authorization': `Bearer ${session.access_token}` }, body: formData })
         if (!response.ok) { const errData = await response.json().catch(() => ({})); setError(errData.error || `Upload failed for ${files[i].name}`); allSuccess = false; break }
       }
       if (allSuccess) { await fetchDocuments() }
@@ -106,7 +106,7 @@ export function DocumentsPage() {
     try {
       const { data: { session } } = await supabase.auth.getSession()
       if (!session?.access_token) return
-      const response = await fetch(`/api/documents/${docId}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${session.access_token}` } })
+      const response = await fetch(`${getApiBaseUrl()}/api/documents/${docId}`, { method: 'DELETE', headers: { 'Authorization': `Bearer ${session.access_token}` } })
       if (response.ok) { setDocuments(documents.filter(d => d.id !== docId)) } else { setError('Failed to delete document') }
     } catch (err) { console.error("Error deleting document:", err); setError("Failed to delete document") }
   }
