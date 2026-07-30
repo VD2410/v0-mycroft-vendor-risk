@@ -10,7 +10,8 @@ const nextConfig = {
     unoptimized: true,
   },
   devIndicators: false,
-  output: 'standalone',
+  output: 'export',
+  trailingSlash: true,
 }
 
 module.exports = nextConfig

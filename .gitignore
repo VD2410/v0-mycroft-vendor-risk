@@ -3,3 +3,4 @@ dist/
 *.log
 .next/
 node_modules/
+out/
