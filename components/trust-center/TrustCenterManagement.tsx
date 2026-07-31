@@ -102,10 +102,14 @@ export default function TrustCenterManagement() {
   const loadSettings = async () => {
     try {
       const headers = await getAuthHeaders()
-      const res = await fetch(`${getApiBaseUrl()}/api/trust-center-settings`, { headers })
+      const companyId = localStorage.getItem('wisr_company_id')
+      const url = companyId
+        ? `${getApiBaseUrl()}/api/trust-center-settings?company_id=${companyId}`
+        : `${getApiBaseUrl()}/api/trust-center-settings`
+      const res = await fetch(url, { headers })
       if (res.ok) {
         const data = await res.json()
-        setSettings(data.settings || settings)
+        setSettings(data.settings || data)
         if (data.slug) {
           setTrustCenterUrl(`${window.location.origin}/trust/${data.slug}`)
         }
@@ -121,10 +125,11 @@ export default function TrustCenterManagement() {
     setSaving(true)
     try {
       const headers = await getAuthHeaders()
+      const companyId = localStorage.getItem('wisr_company_id')
       const res = await fetch(`${getApiBaseUrl()}/api/trust-center-settings`, {
         method: 'PUT',
         headers,
-        body: JSON.stringify(settings),
+        body: JSON.stringify({ ...settings, ...(companyId ? { company_id: parseInt(companyId) } : {}) }),
       })
       if (res.ok) {
         const data = await res.json()
