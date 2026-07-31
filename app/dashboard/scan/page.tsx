@@ -1,12 +1,4 @@
-"use client"
-
-import { useEffect } from "react"
-import { useRouter } from "next/navigation"
-
-export default function ScanRedirect() {
-  const router = useRouter()
-  useEffect(() => {
-    router.replace("/dashboard")
-  }, [router])
-  return null
-}
+'use client'
+import dynamic from 'next/dynamic'
+const ScanClient = dynamic(() => import('./ScanClient'), { ssr: false })
+export default function Page() { return <ScanClient /> }

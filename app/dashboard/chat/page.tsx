@@ -1,5 +1,4 @@
-import { ChatInterface } from "@/components/dashboard/chat-interface"
-
-export default function ChatPage() {
-  return <ChatInterface />
-}
+'use client'
+import dynamic from 'next/dynamic'
+const ChatClient = dynamic(() => import('./ChatClient'), { ssr: false })
+export default function Page() { return <ChatClient /> }

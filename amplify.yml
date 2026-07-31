@@ -3,23 +3,16 @@ frontend:
   phases:
     preBuild:
       commands:
-        - npm install -g pnpm@10.28.0
+        - npm install -g pnpm
         - pnpm install
-        - pnpm approve-builds --all || true
     build:
       commands:
-        - pnpm run build
-        - echo "Build completed successfully"
+        - pnpm build
   artifacts:
     baseDirectory: .next
     files:
-      - "**/*"
+      - '**/*'
   cache:
     paths:
       - node_modules/**/*
       - .next/cache/**/*
-  customHeaders:
-    - pattern: "/**"
-      headers:
-        - key: "Cache-Control"
-          value: "public, max-age=3600"

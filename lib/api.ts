@@ -1,10 +1,10 @@
 /**
  * Returns the API base URL for making backend requests.
  * 
- * All requests go directly to the backend ALB with CORS enabled.
- * This avoids the need for Next.js API proxy routes which don't work
- * in static/SSG deployments on Amplify.
+ * Uses CloudFront distribution (d2utdsd5p4hfb9.cloudfront.net) as HTTPS proxy
+ * in front of the ALB. This ensures no mixed-content issues when the frontend
+ * is served over HTTPS (Amplify).
  */
 export function getApiBaseUrl(): string {
-  return process.env.NEXT_PUBLIC_BACKEND_URL || 'http://wisr-alb-1548153603.ca-central-1.elb.amazonaws.com'
+  return process.env.NEXT_PUBLIC_BACKEND_URL || 'https://d2utdsd5p4hfb9.cloudfront.net'
 }

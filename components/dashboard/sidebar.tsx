@@ -11,6 +11,7 @@ import {
   ChevronLeft,
   ChevronRight,
   MessageSquare,
+  Shield,
 } from "lucide-react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
@@ -21,6 +22,7 @@ const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/dashboard/chat", label: "Chat", icon: MessageSquare },
   { href: "/dashboard/documents", label: "Documents", icon: FileText },
+  { href: "/dashboard/trust-center", label: "Trust Center", icon: Shield },
   { href: "/dashboard/settings", label: "Settings", icon: Settings },
 ]
 
@@ -57,7 +59,7 @@ export function DashboardSidebar() {
 
       <nav className="flex-1 p-2 space-y-1">
         {navItems.map((item) => {
-          const isActive = pathname === item.href
+          const isActive = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href))
           return (
             <Link
               key={item.href}

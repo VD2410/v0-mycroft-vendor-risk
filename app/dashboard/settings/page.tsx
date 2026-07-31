@@ -1,5 +1,4 @@
-import { SettingsPage } from "@/components/dashboard/settings-page"
-
-export default function Settings() {
-  return <SettingsPage />
-}
+'use client'
+import dynamic from 'next/dynamic'
+const SettingsClient = dynamic(() => import('./SettingsClient'), { ssr: false })
+export default function Page() { return <SettingsClient /> }

@@ -1,5 +1,4 @@
-import { DocumentsPage } from "@/components/dashboard/documents-page"
-
-export default function Documents() {
-  return <DocumentsPage />
-}
+'use client'
+import dynamic from 'next/dynamic'
+const DocumentsClient = dynamic(() => import('./DocumentsClient'), { ssr: false })
+export default function Page() { return <DocumentsClient /> }

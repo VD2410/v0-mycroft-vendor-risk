@@ -1,12 +1,4 @@
-"use client"
-
-import { useEffect } from "react"
-import { useRouter } from "next/navigation"
-
-export default function TrendsRedirect() {
-  const router = useRouter()
-  useEffect(() => {
-    router.replace("/dashboard")
-  }, [router])
-  return null
-}
+'use client'
+import dynamic from 'next/dynamic'
+const TrendsClient = dynamic(() => import('./TrendsClient'), { ssr: false })
+export default function Page() { return <TrendsClient /> }

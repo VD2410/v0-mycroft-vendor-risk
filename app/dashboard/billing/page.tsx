@@ -1,12 +1,4 @@
-"use client"
-
-import { useEffect } from "react"
-import { useRouter } from "next/navigation"
-
-export default function BillingRedirect() {
-  const router = useRouter()
-  useEffect(() => {
-    router.replace("/dashboard/settings")
-  }, [router])
-  return null
-}
+'use client'
+import dynamic from 'next/dynamic'
+const BillingClient = dynamic(() => import('./BillingClient'), { ssr: false })
+export default function Page() { return <BillingClient /> }
